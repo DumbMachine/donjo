@@ -1,9 +1,8 @@
 use std::fs;
-use std::path::Path;
+// use std::path::Path;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
 extern crate dirs;
-// use dirs;
 
 // fn main() {
 //     let x:bool = directory_fine(Path::new(dirs::document_dir()).join("Typora"));

@@ -11,16 +11,26 @@ use structopt::StructOpt;
 /// The help message that will be displayed when passing `--help`.
 struct Opt {
 
+    /// Custom location
+    #[structopt(short = "c", long = "custom")]
+    custom: bool,
+
+
     /// Path of the location
-    #[structopt(short = "p", long = "path")]
-    path: String,
+    #[structopt(
+        short = "p",
+        long = "path",
+        parse(from_os_str),
+        // required_ifs = ("force")
+    )]
+    path: std::path::PathBuf,
 
     /// Should -f argument be used with git.
     #[structopt(short = "f", long = "force")]
     force: bool,
 
     /// Initialize the donjo cli in the directory.
-    #[structopt(short = "i", long = "init")]
+    #[structopt(short = "i", long = "init", conflicts_with = "sync")]
     init: bool,
 
     /// Sync the notes with Github
@@ -33,21 +43,39 @@ struct Opt {
 }
 
 fn main() {
-    // let opt = Opt::from_args();
-    // println!("{:#?}", opt);
-    // if opt.init == true {
-    //     utils::init(opt.force);
-    // }
-    // if opt.sync == true {
-    //     utils::commit();
-    //     utils::push_origin();
-    // }
-    // if opt.generate == true {
-    //     utils::generate();
-    // }
-    let documents_dir = dirs::document_dir().unwrap();
-    let base_dir = Path::new(&documents_dir).join("Typora");
-    println!("{:#?}", base_dir.display());
+    let opt = Opt::from_args();
+
+    // let mut base_dir: std::path::PathBuf;
+
+    println!("{:#?}", opt);
+
+    let base_dir = if opt.path.to_str().unwrap() == "default" {
+        let documents_dir = dirs::document_dir().unwrap();
+        let dir = Path::new(&documents_dir).join("Typora");
+        print!("[INFO] Choosing the Default Location at: {}", dir.display());
+        dir
+    } else {
+        if opt.path.exists() {
+            // Pass --path default if
+            let dir = Path::new(&opt.path).to_path_buf();
+            dir
+        } else {
+            panic!("Directory Doesn't Exist")
+        }
+    };
+
+    if opt.init == true {
+        utils::init(opt.force);
+    }
+    if opt.sync == true {
+        utils::commit();
+        utils::push_origin();
+    }
+    if opt.generate == true {
+        utils::generate();
+    }
+
+    println!("{}", base_dir.display());
     println!("{:#?}", utils::directory_check(base_dir));
 
 }
