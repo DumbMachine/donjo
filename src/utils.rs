@@ -1,9 +1,11 @@
 use std::env;
 use std::fs;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 use std::path::Path;
+
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
-
 pub fn directory_check(dir: &std::path::PathBuf) -> bool {
 
     if fs::read_dir(dir).unwrap().count() == 0 {
@@ -17,7 +19,6 @@ pub fn directory_check(dir: &std::path::PathBuf) -> bool {
 pub fn init(location: &std::path::PathBuf, force: bool) {
 
     // Checking if the file exists
-
     env::set_current_dir(&location).unwrap();
 
     if force {
@@ -170,26 +171,33 @@ pub fn git_printer(string: std::string::String) {
 //     }
 // }
 
-pub fn visit(location: &std::path::PathBuf, files: &mut Vec<String>) {
+pub fn readme(location: &std::path::PathBuf, files: &mut Vec<String>) {
     if location.is_dir() {
+        fs::write(location.join("README.md"), "# Index\n").expect("Unable to write file");
+
         for entry in fs::read_dir(location).unwrap() {
             let entry = entry.unwrap();
             let path = entry.path();
             if path.is_dir() {
-                visit(&path, files);
+                readme(&path, files);
             } else {
                 if path.to_str().unwrap().contains(".md") {
-                    let mut link = "https://github.com/DumbMachine/donjo-example/".to_owned();
-                    // println!("{:#?}====={:#?}",entry.path().to_str()., 1);
-                    // link.push_str();
-                    let z: Vec<&str> = path.to_str().unwrap().split("/").collect();
-                    // let z: Vec<&str> = text.split("/").collect();
-                    // let hmm = z.splice(4..,).collect();
-                    // let mut hmm: Vec<&str> = ["0", "m"].to_vec();
-                    // hmm.copy_from_slice(&z[4..]);
-                    println!("GAY: {:#?}", get_link(&path))
-                    // println!("{:#?}", z[z.len()-2].to_owned()+"/"+z[z.len()-1]);
-                    // files.push(link);
+                    // println!("GAY: {:#?}", get_link(&path));
+
+                    let mut file = OpenOptions::new()
+                        .write(true)
+                        .append(true)
+                        .open(location.join("README.md"))
+                        .unwrap();
+
+                    if let Err(e) = writeln!(
+                        file,
+                        "- [{}]({})",
+                        entry.file_name().into_string().unwrap(),
+                        get_link(&path)
+                    ) {
+                        eprintln!("Couldn't write to file: {}", e);
+                    }
                 }
             }
         }
@@ -197,16 +205,19 @@ pub fn visit(location: &std::path::PathBuf, files: &mut Vec<String>) {
 }
 
 pub fn get_link(path: &std::path::PathBuf) -> String {
-    let mut z: Vec<&str> = path.to_str().unwrap().split("/").collect();
-    let mut ret = String::new();
+    let z: Vec<&str> = path.to_str().unwrap().split("/").collect();
+    let mut ret = String::from("https://github.com/DumbMachine/donjo-example/blob/master/");
     let mut flag: bool = false;
     for item in z.iter() {
         if flag {
             if !item.contains(z[z.len() - 1]) {
                 ret.push_str(item);
                 ret.push_str("/");
+                ret = ret.replace(" ", "%20");
             } else {
                 ret.push_str(item.to_owned());
+                ret = ret.replace(" ", "%20");
+
             }
         } else {
             if item.contains("Typora") {
@@ -217,19 +228,10 @@ pub fn get_link(path: &std::path::PathBuf) -> String {
     ret
 }
 
-fn main() {
-    let base = Path::new("/home/dumbmachine/Documents/Typora").to_path_buf();
-    let mut files = Vec::new();
-    visit(&base, &mut files);
-    // println!("{:#?}", files);
-    // get_files(base);
-}
-
-#[derive(Debug)]
-struct Metadata {
-    len: u64,
-    name: String,
-    location: String,
-    modified: std::time::Duration,
-    // created: std::time::Duration,
-}
+// fn main() {
+//     let base = Path::new("/home/dumbmachine/Documents/Typora").to_path_buf();
+//     let mut files = Vec::new();
+//     readme(&base, &mut files);
+//     // println!("{:#?}", files);
+//     // get_files(base);
+// }

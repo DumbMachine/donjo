@@ -1,5 +1,4 @@
 mod utils;
-use colored::*;
 use dirs;
 use std::path::Path;
 use structopt::clap::Shell;
@@ -67,9 +66,15 @@ fn main() {
     if utils::directory_check(&base_dir) {
 
         if opt.init == true {
+            // let path = Path::new(".").to_path_buf();
+            let mut files = Vec::new();
+            utils::readme(&base_dir, &mut files);
             utils::init(&base_dir, opt.force);
+
         }
         if opt.sync == true {
+            let mut files = Vec::new();
+            utils::readme(&base_dir, &mut files);
             utils::sync(&base_dir, opt.force);
         }
         if opt.generate == true {
