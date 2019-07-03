@@ -136,25 +136,54 @@ pub fn git_printer(string: std::string::String) {
 }
 
 pub fn get_files(location: std::path::PathBuf) {
-    let mut files: Vec<String> = [].to_vec();
+    // let mut files = vec![];
+    // let mut files: Vec< String, std::path::Path > = [].to_vec();
     for item in fs::read_dir(location).unwrap() {
         let item = item.unwrap();
         if item.file_name().into_string().unwrap().contains(".md") {
-            // println!("!");
-            files.push(item.file_name().into_string().unwrap());
-        }
-        // }
-    }
-    // for item in fs::read_dir(location).unwrap() {
-    //     let item = item.unwrap();
-    //     if item.path().is_file() {
-    //         println!("{:#?}", item);
-    //     }
-    // }
-    println!("{:#?}", files);
+            // // files.push([item.file_name().into_string().unwrap(), item.path()].to_vec());
+            // files.push(
+            //     [
+            //         item.file_name().into_string().unwrap(),
+            //         item.path().to_str().unwrap().to_string(),
+            //     ]
+            //     .to_vec(),
+            // );
+            let file: Metadata = Metadata {
+                name: item.file_name().into_string().unwrap(),
+                location: item.path().to_str().unwrap().to_string(),
 
+                len: fs::metadata(item.path()).unwrap().len(),
+                modified: fs::metadata(item.path())
+                    .unwrap()
+                    .modified()
+                    .unwrap()
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .unwrap(),
+                // created: fs::metadata(item.path()).unwrap().created().unwrap().duration_since(SystemTime::UNIX_EPOCH).unwrap(),
+            };
+
+            // let t = fs::metadata(item.path())
+            //     .unwrap()
+            //     .modified()
+            //     .unwrap()
+            //     .duration_since(SystemTime::UNIX_EPOCH);
+            println!("ENUM {:#?}", file);
+        }
+        // println!("{:#?}", files);
+    }
 }
+
 fn main() {
     let base = Path::new("/home/dumbmachine/Documents/Typora").to_path_buf();
     get_files(base);
+}
+
+#[derive(Debug)]
+struct Metadata {
+    len: u64,
+    name: String,
+    location: String,
+    modified: std::time::Duration,
+    // created: std::time::Duration,
 }
