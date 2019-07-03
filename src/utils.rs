@@ -1,7 +1,36 @@
 use std::fs;
+use std::path::Path;
 use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
+extern crate dirs;
+// use dirs;
 
+// fn main() {
+//     let x:bool = directory_fine(Path::new(dirs::document_dir()).join("Typora"));
+//     println!("{:#?}",x);
+//         let paths = fs::read_dir("/home/dumbmachine/Documents/Typora/").unwrap();
+
+//     for path in paths {
+//         println!("Name: {}", path.unwrap().path().display())
+//     }
+// }
+
+pub fn directory_check(dir: std::path::PathBuf) -> bool {
+    if !dir.is_dir() {
+        eprintln!("[ERROR] DirectoryNotFoundError: {}", dir.display());
+        false
+    } else {
+        if fs::read_dir(&dir).unwrap().count() == 0 {
+            eprintln!("[ERROR] DirectoryIsEmptyError: {}", dir.display());
+            false
+        } else {
+            for x in fs::read_dir(&dir).unwrap() {
+                println!("{:#?}", x.unwrap().file_name());
+            }
+            true
+        }
+    }
+}
 
 pub fn init(force: bool) {
 

@@ -1,8 +1,8 @@
-#[macro_use]
-extern crate structopt;
-mod temp;
-use structopt::StructOpt;
+mod utils;
 
+use dirs;
+use std::path::Path;
+use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "donjo",
@@ -10,6 +10,10 @@ use structopt::StructOpt;
 )]
 /// The help message that will be displayed when passing `--help`.
 struct Opt {
+
+    /// Path of the location
+    #[structopt(short = "p", long = "path")]
+    path: String,
 
     /// Should -f argument be used with git.
     #[structopt(short = "f", long = "force")]
@@ -29,17 +33,22 @@ struct Opt {
 }
 
 fn main() {
-    let opt = Opt::from_args();
-    println!("{:#?}", opt);
-    if opt.init == true {
-        temp::init(opt.force);
-    }
-    if opt.sync == true {
-        temp::commit();
-        temp::push_origin();
-    }
-    if opt.generate == true {
-        temp::generate();
-    }
+    // let opt = Opt::from_args();
+    // println!("{:#?}", opt);
+    // if opt.init == true {
+    //     utils::init(opt.force);
+    // }
+    // if opt.sync == true {
+    //     utils::commit();
+    //     utils::push_origin();
+    // }
+    // if opt.generate == true {
+    //     utils::generate();
+    // }
+    let documents_dir = dirs::document_dir().unwrap();
+    let base_dir = Path::new(&documents_dir).join("Typora");
+    println!("{:#?}", base_dir.display());
+    println!("{:#?}", utils::directory_check(base_dir));
+
 }
 

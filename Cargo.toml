@@ -5,4 +5,5 @@ authors = ["DumbMachine <ratin.kumar.2k@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-structopt = "0.2.10"
+structopt = "0.2.18"
+dirs = "2.0.1"
