@@ -1,5 +1,5 @@
 mod utils;
-
+use colored::*;
 use dirs;
 use std::path::Path;
 use structopt::clap::Shell;
@@ -50,7 +50,7 @@ fn main() {
 
     let base_dir = if opt.path.to_str().unwrap() == "default" {
         let documents_dir = dirs::document_dir().unwrap();
-        let dir = Path::new(&documents_dir).join("Typora");
+        let dir = Path::new(&documents_dir).join("Typora").to_path_buf();
         dir
 
     } else {

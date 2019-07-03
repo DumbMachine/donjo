@@ -1,10 +1,8 @@
-use std::process::Command;
-// use std::
 use std::env;
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 use std::time::{SystemTime, UNIX_EPOCH};
-extern crate dirs;
 
 pub fn directory_check(dir: &std::path::PathBuf) -> bool {
 
@@ -43,7 +41,7 @@ pub fn init(location: &std::path::PathBuf, force: bool) {
         );
         return;
     } else {
-        println!("[GIT OUTPUT] {}", init_stdout)
+        // println!("{} {}", "[GIT OUTPUT]".green(), init_stdout)
     }
 
     let _add_remote = Command::new("git")
@@ -135,4 +133,28 @@ pub fn git_printer(string: std::string::String) {
     for line in string.lines() {
         println!("              {}", line);
     }
+}
+
+pub fn get_files(location: std::path::PathBuf) {
+    let mut files: Vec<String> = [].to_vec();
+    for item in fs::read_dir(location).unwrap() {
+        let item = item.unwrap();
+        if item.file_name().into_string().unwrap().contains(".md") {
+            // println!("!");
+            files.push(item.file_name().into_string().unwrap());
+        }
+        // }
+    }
+    // for item in fs::read_dir(location).unwrap() {
+    //     let item = item.unwrap();
+    //     if item.path().is_file() {
+    //         println!("{:#?}", item);
+    //     }
+    // }
+    println!("{:#?}", files);
+
+}
+fn main() {
+    let base = Path::new("/home/dumbmachine/Documents/Typora").to_path_buf();
+    get_files(base);
 }

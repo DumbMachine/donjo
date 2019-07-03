@@ -14,3 +14,4 @@ categories = ["command-line-utilities"]
 [dependencies]
 structopt = "0.2.18"
 dirs = "2.0.1"
+colored = "1.8"
