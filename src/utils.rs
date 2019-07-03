@@ -135,48 +135,94 @@ pub fn git_printer(string: std::string::String) {
     }
 }
 
-pub fn get_files(location: std::path::PathBuf) {
-    // let mut files = vec![];
-    // let mut files: Vec< String, std::path::Path > = [].to_vec();
-    for item in fs::read_dir(location).unwrap() {
-        let item = item.unwrap();
-        if item.file_name().into_string().unwrap().contains(".md") {
-            // // files.push([item.file_name().into_string().unwrap(), item.path()].to_vec());
-            // files.push(
-            //     [
-            //         item.file_name().into_string().unwrap(),
-            //         item.path().to_str().unwrap().to_string(),
-            //     ]
-            //     .to_vec(),
-            // );
-            let file: Metadata = Metadata {
-                name: item.file_name().into_string().unwrap(),
-                location: item.path().to_str().unwrap().to_string(),
 
-                len: fs::metadata(item.path()).unwrap().len(),
-                modified: fs::metadata(item.path())
-                    .unwrap()
-                    .modified()
-                    .unwrap()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap(),
-                // created: fs::metadata(item.path()).unwrap().created().unwrap().duration_since(SystemTime::UNIX_EPOCH).unwrap(),
-            };
+// pub fn get_files(location: std::path::PathBuf) {
+//     let LINK: String = "https://github.com/DumbMachine/donjo-example/".to_owned();
+//     let mut files = vec![];
+//     // let mut files: Vec< String, std::path::Path > = [].to_vec();
+//     for item in fs::read_dir(location).unwrap() {
+//         let item = item.unwrap();
+//         if item.file_name().into_string().unwrap().contains(".md") {
+//             // // files.push([item.file_name().into_string().unwrap(), item.path()].to_vec());
+//             // let temp = ;
+//             let mut LINK = String::from("https://github.com/DumbMachine/donjo-example/");
+//             LINK.push_str(&item.file_name().into_string().unwrap());
+//             files.push([item.file_name().into_string().unwrap(), LINK].to_vec());
+//             // println!("LINK {:?}", LINK)
+//         }
+//         if item.path().is_dir(){
+//             println!("{:#?}", item)
+//         }
+//     }
+//     println!("ENUM {:#?}", files);
+// }
 
-            // let t = fs::metadata(item.path())
-            //     .unwrap()
-            //     .modified()
-            //     .unwrap()
-            //     .duration_since(SystemTime::UNIX_EPOCH);
-            println!("ENUM {:#?}", file);
+
+// pub fn finder(location: std::path::PathBuf, mut files: Vec<String>) {
+//     for item in fs::read_dir(location).unwrap(){
+//         let item = item.unwrap();;
+//         if item.path().is_dir(){
+//             finder(item.path(), files);
+//         } else {
+//             link.push_str(&item.file_name().into_string().unwrap());
+//             files.push(link);
+//         }
+//     }
+// }
+
+pub fn visit(location: &std::path::PathBuf, files: &mut Vec<String>) {
+    if location.is_dir() {
+        for entry in fs::read_dir(location).unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+            if path.is_dir() {
+                visit(&path, files);
+            } else {
+                if path.to_str().unwrap().contains(".md") {
+                    let mut link = "https://github.com/DumbMachine/donjo-example/".to_owned();
+                    // println!("{:#?}====={:#?}",entry.path().to_str()., 1);
+                    // link.push_str();
+                    let z: Vec<&str> = path.to_str().unwrap().split("/").collect();
+                    // let z: Vec<&str> = text.split("/").collect();
+                    // let hmm = z.splice(4..,).collect();
+                    // let mut hmm: Vec<&str> = ["0", "m"].to_vec();
+                    // hmm.copy_from_slice(&z[4..]);
+                    println!("GAY: {:#?}", get_link(&path))
+                    // println!("{:#?}", z[z.len()-2].to_owned()+"/"+z[z.len()-1]);
+                    // files.push(link);
+                }
+            }
         }
-        // println!("{:#?}", files);
     }
+}
+
+pub fn get_link(path: &std::path::PathBuf) -> String {
+    let mut z: Vec<&str> = path.to_str().unwrap().split("/").collect();
+    let mut ret = String::new();
+    let mut flag: bool = false;
+    for item in z.iter() {
+        if flag {
+            if !item.contains(z[z.len() - 1]) {
+                ret.push_str(item);
+                ret.push_str("/");
+            } else {
+                ret.push_str(item.to_owned());
+            }
+        } else {
+            if item.contains("Typora") {
+                flag = true;
+            }
+        }
+    }
+    ret
 }
 
 fn main() {
     let base = Path::new("/home/dumbmachine/Documents/Typora").to_path_buf();
-    get_files(base);
+    let mut files = Vec::new();
+    visit(&base, &mut files);
+    // println!("{:#?}", files);
+    // get_files(base);
 }
 
 #[derive(Debug)]
