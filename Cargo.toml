@@ -1,8 +1,15 @@
 [package]
-name = "dongjo"
+name = "donjo"
 version = "0.1.0"
 authors = ["DumbMachine <ratin.kumar.2k@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "A tool to symc markdown files to github"
+readme = "README.md"
+homepage = "https://github.com/DumbMachine/donjo"
+repository = "https://github.com/DumbMachine/donjo"
+keywords = ["cli", "search", "demo"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 structopt = "0.2.18"

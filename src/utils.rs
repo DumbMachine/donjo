@@ -6,16 +6,6 @@ use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 extern crate dirs;
 
-// fn main() {
-//     let x:bool = directory_fine(Path::new(dirs::document_dir()).join("Typora"));
-//     println!("{:#?}",x);
-//         let paths = fs::read_dir("/home/dumbmachine/Documents/Typora/").unwrap();
-
-//     for path in paths {
-//         println!("Name: {}", path.unwrap().path().display())
-//     }
-// }
-
 pub fn directory_check(dir: &std::path::PathBuf) -> bool {
 
     if fs::read_dir(dir).unwrap().count() == 0 {
@@ -23,9 +13,6 @@ pub fn directory_check(dir: &std::path::PathBuf) -> bool {
         false
     } else {
         true
-        // for x in fs::read_dir(&dir).unwrap() {
-        //     println!("{:#?}", x.unwrap().file_name());
-        // }
     }
 }
 
@@ -59,48 +46,13 @@ pub fn init(location: &std::path::PathBuf, force: bool) {
         println!("[GIT OUTPUT] {}", init_stdout)
     }
 
-    // let add_remote = Command::new("git")
-    //     .arg("remote")
-    //     .arg("set-url")
-    //     .arg("origin")
-    //     .arg("git@github.com:DumbMachine/donjo.git")
-    //     .output()
-    //     .expect("some TING WONG");
-
-    let add_remote = Command::new("git")
+    let _add_remote = Command::new("git")
         .arg("remote")
         .arg("add")
         .arg("origin")
-        .arg("git@github.com:DumbMachine/donjo.git")
+        .arg("git@github.com:DumbMachine/donjo-example.git")
         .output()
         .expect("some TING WONG");
-
-    println!("CD: {:#?}", add_remote);
-
-    // println!("{}", String::from_utf8(add_remote.stdout).unwrap());
-
-    // let cd = Command::new("cd")
-    //     .arg("/home/dumbmachine/Documents/Typora")
-    //     .output()
-    //     .expect("Asdasd");
-
-    // println!("CD: {:#?}", cd);
-
-    // let _ls = Command::new("ls").output().expect("Asdasdasdasdasdasd");
-
-
-    // println!("LS: {:#?}", _ls);
-
-
-    // println!("REMOTE {:#?}", add_remote);
-
-
-    // if init.stderr.len() == 0 {
-    //     println!("{:#?}", add_remote)
-
-    // } else {
-    //     eprint!("some TING WONG")
-    // }
 
 }
 
@@ -134,28 +86,53 @@ pub fn commit() {
 
     let commit_stdout = String::from_utf8(commit_id.stdout).unwrap();
 
-    println!("{}", commit_stdout);
+    println!("[GIT OUTPUT]:");
+    git_printer(commit_stdout);
 }
 
-pub fn push_origin() {
-    let push = Command::new("git")
-        .arg("push")
-        .arg("origin")
-        .arg("master")
-        .arg("-f")
-        .output()
-        .expect("some TING WONG");
+pub fn push_origin(force: bool) {
+    let push = if force {
+        Command::new("git")
+            .arg("push")
+            .arg("origin")
+            .arg("master")
+            .arg("-f")
+            .output()
+            .expect("some TING WONG")
+    } else {
+        Command::new("git")
+            .arg("push")
+            .arg("origin")
+            .arg("master")
+            .output()
+            .expect("some TING WONG")
+    };
 
-    let push_stdout = String::from_utf8(push.stdout).unwrap();
+    // let push_stdout = String::from_utf8(push.stdout).unwrap();
     let push_sterr = String::from_utf8(push.stderr).unwrap();
-    print!("[SUCESS] {}", push_stdout);
-    print!("Error Was Obtrained {}", push_sterr);
+
+    if push_sterr.contains("failed") {
+        eprintln!("[ERROR] UnableToPush. Try adding --force to overcome this. ");
+    } else {
+        println!("Succesfullly Pushed");
+    }
 }
 
-pub fn generate() {
+pub fn sync(location: &std::path::PathBuf, force: bool) {
+    env::set_current_dir(&location).unwrap();
+    commit();
+    push_origin(force);
+}
 
-    let data: String = fs::read_to_string("./src/template.md").expect("Unable to read file");
-    // println!("{}", data.len());
+pub fn generate(location: &std::path::PathBuf) {
+    let data: String =
+        fs::read_to_string(location.join("template.md")).expect("Unable to read file");
 
-    fs::write("./hmm.md", data).expect("Unable to write file");
+    fs::write(location.join("from-template.md"), data).expect("Unable to write file");
+}
+
+pub fn git_printer(string: std::string::String) {
+    for line in string.lines() {
+        println!("              {}", line);
+    }
 }

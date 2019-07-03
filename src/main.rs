@@ -13,11 +13,9 @@ use structopt::StructOpt;
 )]
 /// The help message that will be displayed when passing `--help`.
 struct Opt {
-
     /// Custom location
     #[structopt(short = "c", long = "custom")]
     custom: bool,
-
 
     /// Path of the location
     #[structopt(
@@ -50,8 +48,6 @@ fn main() {
     Opt::clap().gen_completions(env!("CARGO_PKG_NAME"), Shell::Bash, "target");
     let opt = Opt::from_args();
 
-    // println!("{:#?}", opt);
-
     let base_dir = if opt.path.to_str().unwrap() == "default" {
         let documents_dir = dirs::document_dir().unwrap();
         let dir = Path::new(&documents_dir).join("Typora");
@@ -59,7 +55,6 @@ fn main() {
 
     } else {
         if opt.path.exists() {
-            // Pass --path default if
             let dir = Path::new(&opt.path).to_path_buf();
             dir
 
@@ -70,20 +65,17 @@ fn main() {
 
     println!("\nLocation: {}", base_dir.display());
     if utils::directory_check(&base_dir) {
-        // println!("Location:");
 
         if opt.init == true {
             utils::init(&base_dir, opt.force);
         }
         if opt.sync == true {
-            utils::commit();
-            utils::push_origin();
+            utils::sync(&base_dir, opt.force);
         }
         if opt.generate == true {
-            utils::generate();
+            utils::generate(&base_dir);
         }
     }
-    // println!("{:#?}", utils::directory_check(base_dir));
 
 }
 
