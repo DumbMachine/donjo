@@ -2,7 +2,10 @@ mod utils;
 
 use dirs;
 use std::path::Path;
+use structopt::clap::Shell;
 use structopt::StructOpt;
+
+
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "donjo",
@@ -43,40 +46,44 @@ struct Opt {
 }
 
 fn main() {
+
+    Opt::clap().gen_completions(env!("CARGO_PKG_NAME"), Shell::Bash, "target");
     let opt = Opt::from_args();
 
-    // let mut base_dir: std::path::PathBuf;
-
-    println!("{:#?}", opt);
+    // println!("{:#?}", opt);
 
     let base_dir = if opt.path.to_str().unwrap() == "default" {
         let documents_dir = dirs::document_dir().unwrap();
         let dir = Path::new(&documents_dir).join("Typora");
-        print!("[INFO] Choosing the Default Location at: {}", dir.display());
         dir
+
     } else {
         if opt.path.exists() {
             // Pass --path default if
             let dir = Path::new(&opt.path).to_path_buf();
             dir
+
         } else {
-            panic!("Directory Doesn't Exist")
+            panic!("DirectoryNotFoundError at : {}", opt.path.display())
         }
     };
 
-    if opt.init == true {
-        utils::init(opt.force);
-    }
-    if opt.sync == true {
-        utils::commit();
-        utils::push_origin();
-    }
-    if opt.generate == true {
-        utils::generate();
-    }
+    println!("\nLocation: {}", base_dir.display());
+    if utils::directory_check(&base_dir) {
+        // println!("Location:");
 
-    println!("{}", base_dir.display());
-    println!("{:#?}", utils::directory_check(base_dir));
+        if opt.init == true {
+            utils::init(&base_dir, opt.force);
+        }
+        if opt.sync == true {
+            utils::commit();
+            utils::push_origin();
+        }
+        if opt.generate == true {
+            utils::generate();
+        }
+    }
+    // println!("{:#?}", utils::directory_check(base_dir));
 
 }
 

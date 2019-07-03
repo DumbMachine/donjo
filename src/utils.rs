@@ -1,6 +1,8 @@
-use std::fs;
-// use std::path::Path;
 use std::process::Command;
+// use std::
+use std::env;
+use std::fs;
+use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 extern crate dirs;
 
@@ -14,45 +16,47 @@ extern crate dirs;
 //     }
 // }
 
-pub fn directory_check(dir: std::path::PathBuf) -> bool {
-    if !dir.is_dir() {
-        eprintln!("[ERROR] DirectoryNotFoundError: {}", dir.display());
+pub fn directory_check(dir: &std::path::PathBuf) -> bool {
+
+    if fs::read_dir(dir).unwrap().count() == 0 {
+        eprintln!("[ERROR] DirectoryIsEmptyError at : {}", dir.display());
         false
     } else {
-        if fs::read_dir(&dir).unwrap().count() == 0 {
-            eprintln!("[ERROR] DirectoryIsEmptyError: {}", dir.display());
-            false
-        } else {
-            for x in fs::read_dir(&dir).unwrap() {
-                println!("{:#?}", x.unwrap().file_name());
-            }
-            true
-        }
+        true
+        // for x in fs::read_dir(&dir).unwrap() {
+        //     println!("{:#?}", x.unwrap().file_name());
+        // }
     }
 }
 
-pub fn init(force: bool) {
+pub fn init(location: &std::path::PathBuf, force: bool) {
 
     // Checking if the file exists
 
-    // Deleting the file
+    env::set_current_dir(&location).unwrap();
+
     if force {
-        match fs::remove_file(".git") {
-            Ok(_) => println!("Deleted the .git folder, reini"),
-            Err(_) => println!("Skipping the deletion as the file, doesn;t exist"),
+        match fs::remove_dir_all(Path::new(location).join(".git")) {
+            Ok(_) => println!("     Deleted the .git folder"),
+            Err(_) => println!("    Unable to delete the folder."),
         };
     }
 
     let init = Command::new("git")
         .arg("init")
+        // .arg(location.to_str().unwrap())
         .output()
         .expect("some TING WONG");
 
-    if init.stderr.len() == 0 {
-        println!("{:#?}", init);
-
+    let init_stdout = String::from_utf8(init.stdout).unwrap();
+    if init_stdout.contains("Reinitialized") {
+        eprintln!(
+            "       [ERROR] git repo exists at : {}    Add -f/--force argument to reinitialize",
+            location.to_str().unwrap()
+        );
+        return;
     } else {
-        eprint!("some TING WONG");
+        println!("[GIT OUTPUT] {}", init_stdout)
     }
 
     // let add_remote = Command::new("git")
@@ -62,6 +66,7 @@ pub fn init(force: bool) {
     //     .arg("git@github.com:DumbMachine/donjo.git")
     //     .output()
     //     .expect("some TING WONG");
+
     let add_remote = Command::new("git")
         .arg("remote")
         .arg("add")
@@ -69,12 +74,33 @@ pub fn init(force: bool) {
         .arg("git@github.com:DumbMachine/donjo.git")
         .output()
         .expect("some TING WONG");
-    if init.stderr.len() == 0 {
-        println!("{:#?}", add_remote)
 
-    } else {
-        eprint!("some TING WONG")
-    }
+    println!("CD: {:#?}", add_remote);
+
+    // println!("{}", String::from_utf8(add_remote.stdout).unwrap());
+
+    // let cd = Command::new("cd")
+    //     .arg("/home/dumbmachine/Documents/Typora")
+    //     .output()
+    //     .expect("Asdasd");
+
+    // println!("CD: {:#?}", cd);
+
+    // let _ls = Command::new("ls").output().expect("Asdasdasdasdasdasd");
+
+
+    // println!("LS: {:#?}", _ls);
+
+
+    // println!("REMOTE {:#?}", add_remote);
+
+
+    // if init.stderr.len() == 0 {
+    //     println!("{:#?}", add_remote)
+
+    // } else {
+    //     eprint!("some TING WONG")
+    // }
 
 }
 
@@ -108,19 +134,6 @@ pub fn commit() {
 
     let commit_stdout = String::from_utf8(commit_id.stdout).unwrap();
 
-    let mut files_added = String::new();
-
-    // for line in commit_stdout.lines(){
-    //     if line.contains("files changed"){
-    //         println!("Total Changes: {:#?}", line);
-    //     }
-    //     if line.contains(".md"){
-    //         files_added.push_str(line)
-    //     }
-    // }
-
-    // println!("{:#?}", commit_stdout.lines());
-    // println!("Total Changes: {:#?}", files_added);
     println!("{}", commit_stdout);
 }
 
@@ -146,4 +159,3 @@ pub fn generate() {
 
     fs::write("./hmm.md", data).expect("Unable to write file");
 }
-
